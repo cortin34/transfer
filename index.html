@@ -2,66 +2,127 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Калькулятор трансфера</title>
   <style>
+    /* Базовые стили */
     body {
       font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 50px auto;
+      margin: 0;
       padding: 20px;
+      background-color: #f5f5f5;
     }
+
+    /* Контейнер формы */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5em; /* Уменьшаем заголовок на мобильных */
+      margin-bottom: 20px;
+    }
+
+    /* Стили для полей ввода */
     label {
       display: block;
       margin: 10px 0 5px;
+      font-weight: bold;
     }
+
     input {
       width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box; /* Важно для адаптивности */
+      font-size: 16px; /* Удобный размер шрифта для ввода */
     }
+
+    /* Стили для кнопки */
     button {
       margin-top: 20px;
-      padding: 10px 20px;
+      width: 100%;
+      padding: 12px;
       background-color: #4CAF50;
       color: white;
       border: none;
+      border-radius: 4px;
       cursor: pointer;
+      font-size: 16px;
     }
+
     button:hover {
       background-color: #45a049;
     }
+
+    /* Стили для результата */
     #result {
       margin-top: 20px;
+      padding: 10px;
+      background-color: #e8f5e9;
+      border-left: 4px solid #4CAF50;
       font-size: 1.2em;
       font-weight: bold;
+      text-align: center;
+    }
+
+    /* Адаптивность для экранов шириной до 480px (мобильные) */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.3em;
+      }
+
+      label {
+        font-size: 0.9em;
+      }
+
+      input, button {
+        padding: 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Расчёт стоимости трансфера</h1>
+  <div class="container">
+    <h1>Расчёт стоимости трансфера</h1>
 
-  <label for="oneWayKm">Километраж в 1 сторону:</label>
-  <input type="number" id="oneWayKm" placeholder="например, 330">
+    <label for="oneWayKm">Километраж в 1 сторону:</label>
+    <input type="number" id="oneWayKm" placeholder="например, 330">
 
-  <label for="waitingHours">Количество часов ожидания:</label>
-  <input type="number" id="waitingHours" placeholder="например, 0">
+    <label for="waitingHours">Количество часов ожидания:</label>
+    <input type="number" id="waitingHours" placeholder="например, 0">
 
-  <label for="tollRoad">Платная дорога:</label>
-  <input type="number" id="tollRoad" placeholder="например, 0">
+    <label for="tollRoad">Платная дорога:</label>
+    <input type="number" id="tollRoad" placeholder="например, 0">
 
-  <label for="paidNights">Количество платных ночей в рейсе:</label>
-  <input type="number" id="paidNights" placeholder="например, 0">
+    <label for="paidNights">Количество платных ночей в рейсе:</label>
+    <input type="number" id="paidNights" placeholder="например, 0">
 
-  <label for="idleDays">Количество дней простоя:</label>
-  <input type="number" id="idleDays" placeholder="например, 0">
+    <label for="idleDays">Количество дней простоя:</label>
+    <input type="number" id="idleDays" placeholder="например, 0">
 
-  <button onclick="calculate()">Рассчитать</button>
+    <button onclick="calculate()">Рассчитать</button>
 
-  <div id="result"></div>
+    <div id="result"></div>
+  </div>
 
   <script>
     // ЗАМЕНИТЕ ЭТОТ URL НА ВАШ
-    // Убедитесь, что это URL веб-приложения из Google Apps Script (после деплоя)
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzmliAW6ZEo3-0E9ZYjQ7nswnA_H5I6MuzUlj1MyaPt1wfnqfOwLeZ8QJFCZkTuaV0Mhg/exec';
 
     function calculate() {
@@ -71,7 +132,6 @@
       const paidNights = document.getElementById('paidNights').value || 0;
       const idleDays = document.getElementById('idleDays').value || 0;
 
-      // Подготовим данные в формате FormData
       const formData = new FormData();
       formData.append('oneWayKm', parseFloat(oneWayKm));
       formData.append('waitingHours', parseFloat(waitingHours));
@@ -81,8 +141,7 @@
 
       fetch(WEB_APP_URL, {
         method: 'POST',
-        body: formData, // Отправляем как FormData, а не JSON
-        // Убираем заголовок Content-Type, браузер сам его поставит
+        body: formData,
       })
       .then(response => response.json())
       .then(data => {
