@@ -61,6 +61,7 @@
 
   <script>
     // ЗАМЕНИТЕ ЭТОТ URL НА ВАШ
+    // Убедитесь, что это URL веб-приложения из Google Apps Script (после деплоя)
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzmliAW6ZEo3-0E9ZYjQ7nswnA_H5I6MuzUlj1MyaPt1wfnqfOwLeZ8QJFCZkTuaV0Mhg/exec';
 
     function calculate() {
@@ -70,21 +71,26 @@
       const paidNights = document.getElementById('paidNights').value || 0;
       const idleDays = document.getElementById('idleDays').value || 0;
 
-      // Отправляем данные на Google Apps Script
+      // Подготовим данные в формате FormData
+      const formData = new FormData();
+      formData.append('oneWayKm', parseFloat(oneWayKm));
+      formData.append('waitingHours', parseFloat(waitingHours));
+      formData.append('tollRoad', parseFloat(tollRoad));
+      formData.append('paidNights', parseFloat(paidNights));
+      formData.append('idleDays', parseFloat(idleDays));
+
       fetch(WEB_APP_URL, {
         method: 'POST',
-        body: JSON.stringify({
-          oneWayKm: parseFloat(oneWayKm),
-          waitingHours: parseFloat(waitingHours),
-          tollRoad: parseFloat(tollRoad),
-          paidNights: parseFloat(paidNights),
-          idleDays: parseFloat(idleDays)
-        }),
-        headers: { 'Content-Type': 'application/json' }
+        body: formData, // Отправляем как FormData, а не JSON
+        // Убираем заголовок Content-Type, браузер сам его поставит
       })
       .then(response => response.json())
       .then(data => {
-        document.getElementById('result').innerText = `Итого: ${data.result} руб.`;
+        if (data.error) {
+          document.getElementById('result').innerText = `Ошибка: ${data.error}`;
+        } else {
+          document.getElementById('result').innerText = `Итого: ${data.result} руб.`;
+        }
       })
       .catch(error => {
         console.error('Ошибка:', error);
@@ -93,6 +99,4 @@
     }
   </script>
 </body>
-
 </html>
-
