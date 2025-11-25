@@ -25,7 +25,7 @@
 
     h1 {
       text-align: center;
-      font-size: 1.5em; /* Уменьшаем заголовок на мобильных */
+      font-size: 1.5em;
       margin-bottom: 20px;
     }
 
@@ -41,8 +41,8 @@
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-sizing: border-box; /* Важно для адаптивности */
-      font-size: 16px; /* Удобный размер шрифта для ввода */
+      box-sizing: border-box;
+      font-size: 16px;
     }
 
     /* Стили для кнопки */
@@ -62,16 +62,34 @@
       background-color: #45a049;
     }
 
-    /* Стили для результата */
+    /* Стили для результата — изначально скрыт */
     #result {
       margin-top: 20px;
       padding: 10px;
-      background-color: #4CAF50; /* Одинаковый зелёный цвет */
-      color: white; /* Белый текст для контраста */
       border-radius: 4px;
       font-size: 1.2em;
       font-weight: bold;
       text-align: center;
+      display: none; /* Скрыто по умолчанию */
+    }
+
+    /* Стиль для "Расчёт..." */
+    #result.loading {
+      display: block; /* Показываем */
+      background-color: #e0e0e0; /* Светло-серый фон */
+      color: #666; /* Тёмно-серый текст */
+    }
+
+    /* Стиль для успешного результата */
+    #result.success {
+      background-color: #98FB98; /* Зелёный фон */
+      color: white; /* Белый текст */
+    }
+
+    /* Стиль для ошибки */
+    #result.error {
+      background-color: #f44336; /* Красный фон */
+      color: white; /* Белый текст */
     }
 
     /* Адаптивность для экранов шириной до 480px (мобильные) */
@@ -127,6 +145,13 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzmliAW6ZEo3-0E9ZYjQ7nswnA_H5I6MuzUlj1MyaPt1wfnqfOwLeZ8QJFCZkTuaV0Mhg/exec';
 
     function calculate() {
+      const resultDiv = document.getElementById('result');
+
+      // Показываем "Расчёт..." с серым фоном
+      resultDiv.className = 'loading'; // Применяем стиль для загрузки
+      resultDiv.innerText = 'Расчёт...';
+      resultDiv.style.display = 'block'; // Показываем блок
+
       const oneWayKm = document.getElementById('oneWayKm').value || 0;
       const waitingHours = document.getElementById('waitingHours').value || 0;
       const tollRoad = document.getElementById('tollRoad').value || 0;
@@ -147,18 +172,19 @@
       .then(response => response.json())
       .then(data => {
         if (data.error) {
-          document.getElementById('result').innerText = `Ошибка: ${data.error}`;
+          resultDiv.className = 'error'; // Применяем стиль для ошибки
+          resultDiv.innerText = `Ошибка: ${data.error}`;
         } else {
-          document.getElementById('result').innerText = `Итого: ${data.result} руб.`;
+          resultDiv.className = 'success'; // Применяем стиль для успеха
+          resultDiv.innerText = `Итого: ${data.result} руб.`;
         }
       })
       .catch(error => {
         console.error('Ошибка:', error);
-        document.getElementById('result').innerText = 'Произошла ошибка при расчёте.';
+        resultDiv.className = 'error'; // Применяем стиль для ошибки
+        resultDiv.innerText = 'Произошла ошибка при расчёте.';
       });
     }
   </script>
 </body>
 </html>
-
-
