@@ -1,190 +1,44 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Калькулятор трансфера</title>
-  <style>
-    /* Базовые стили */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f5f5f5;
+function calculate() {
+  const resultDiv = document.getElementById('result');
+
+  // Сбрасываем все классы и устанавливаем loading
+  resultDiv.className = ''; // Убираем все предыдущие классы
+  resultDiv.classList.add('loading'); // Добавляем класс loading
+
+  // Показываем блок и устанавливаем текст
+  resultDiv.innerText = 'Расчёт...';
+  resultDiv.style.display = 'block';
+
+  const oneWayKm = document.getElementById('oneWayKm').value || 0;
+  const waitingHours = document.getElementById('waitingHours').value || 0;
+  const tollRoad = parseFloat(document.getElementById('tollRoad').value) || 0;
+  const paidNights = parseFloat(document.getElementById('paidNights').value) || 0;
+  const idleDays = parseFloat(document.getElementById('idleDays').value) || 0;
+
+  const formData = new FormData();
+  formData.append('oneWayKm', oneWayKm);
+  formData.append('waitingHours', waitingHours);
+  formData.append('tollRoad', tollRoad);
+  formData.append('paidNights', paidNights);
+  formData.append('idleDays', idleDays);
+
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    body: formData,
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.error) {
+      resultDiv.className = 'error';
+      resultDiv.innerText = `Ошибка: ${data.error}`;
+    } else {
+      resultDiv.className = 'success';
+      resultDiv.innerText = `Итого: ${data.result} руб.`;
     }
-
-    /* Контейнер формы */
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 1.5em;
-      margin-bottom: 20px;
-    }
-
-    /* Стили для полей ввода */
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    /* Стили для кнопки */
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    /* Стили для результата — изначально скрыт */
-    #result {
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 4px;
-      font-size: 1.2em;
-      font-weight: bold;
-      text-align: center;
-      display: none; /* Скрыто по умолчанию */
-    }
-
-    /* Стиль для "Расчёт..." */
-    #result.loading {
-      display: block; /* Показываем */
-      background-color: #e0e0e0; /* Светло-серый фон */
-      color: #666; /* Тёмно-серый текст */
-    }
-
-    /* Стиль для успешного результата */
-    #result.success {
-      background-color: #4CAF50; /* Зелёный фон */
-      color: white; /* Белый текст */
-    }
-
-    /* Стиль для ошибки */
-    #result.error {
-      background-color: #f44336; /* Красный фон */
-      color: white; /* Белый текст */
-    }
-
-    /* Адаптивность для экранов шириной до 480px (мобильные) */
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      .container {
-        padding: 15px;
-      }
-
-      h1 {
-        font-size: 1.3em;
-      }
-
-      label {
-        font-size: 0.9em;
-      }
-
-      input, button {
-        padding: 12px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Расчёт стоимости трансфера</h1>
-
-    <label for="oneWayKm">Километраж в 1 сторону:</label>
-    <input type="number" id="oneWayKm" placeholder="например, 330">
-
-    <label for="waitingHours">Количество часов ожидания:</label>
-    <input type="number" id="waitingHours" placeholder="например, 0">
-
-    <label for="tollRoad">Платная дорога:</label>
-    <input type="number" id="tollRoad" placeholder="например, 0">
-
-    <label for="paidNights">Количество платных ночей в рейсе:</label>
-    <input type="number" id="paidNights" placeholder="например, 0">
-
-    <label for="idleDays">Количество дней простоя:</label>
-    <input type="number" id="idleDays" placeholder="например, 0">
-
-    <button onclick="calculate()">Рассчитать</button>
-
-    <div id="result"></div>
-  </div>
-
-  <script>
-    // ЗАМЕНИТЕ ЭТОТ URL НА ВАШ
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzmliAW6ZEo3-0E9ZYjQ7nswnA_H5I6MuzUlj1MyaPt1wfnqfOwLeZ8QJFCZkTuaV0Mhg/exec';
-
-    function calculate() {
-      const resultDiv = document.getElementById('result');
-
-      // Показываем "Расчёт..." с серым фоном
-      resultDiv.className = 'loading'; // Применяем стиль для загрузки
-      resultDiv.innerText = 'Расчёт...';
-      resultDiv.style.display = 'block'; // Показываем блок
-
-      const oneWayKm = document.getElementById('oneWayKm').value || 0;
-      const waitingHours = document.getElementById('waitingHours').value || 0;
-      const tollRoad = document.getElementById('tollRoad').value || 0;
-      const paidNights = document.getElementById('paidNights').value || 0;
-      const idleDays = document.getElementById('idleDays').value || 0;
-
-      const formData = new FormData();
-      formData.append('oneWayKm', parseFloat(oneWayKm));
-      formData.append('waitingHours', parseFloat(waitingHours));
-      formData.append('tollRoad', parseFloat(tollRoad));
-      formData.append('paidNights', parseFloat(paidNights));
-      formData.append('idleDays', parseFloat(idleDays));
-
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          resultDiv.className = 'error'; // Применяем стиль для ошибки
-          resultDiv.innerText = `Ошибка: ${data.error}`;
-        } else {
-          resultDiv.className = 'success'; // Применяем стиль для успеха
-          resultDiv.innerText = `Итого: ${data.result} руб.`;
-        }
-      })
-      .catch(error => {
-        console.error('Ошибка:', error);
-        resultDiv.className = 'error'; // Применяем стиль для ошибки
-        resultDiv.innerText = 'Произошла ошибка при расчёте.';
-      });
-    }
-  </script>
-</body>
-</html>
+  })
+  .catch(error => {
+    console.error('Ошибка:', error);
+    resultDiv.className = 'error';
+    resultDiv.innerText = 'Произошла ошибка при расчёте.';
+  });
+}
