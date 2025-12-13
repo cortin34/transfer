@@ -13,7 +13,6 @@
       background-color: #f5f5f5;
     }
 
-    /* Контейнер формы */
     .container {
       max-width: 600px;
       margin: 0 auto;
@@ -29,7 +28,6 @@
       margin-bottom: 20px;
     }
 
-    /* Стили для полей ввода */
     label {
       display: block;
       margin: 10px 0 5px;
@@ -45,7 +43,6 @@
       font-size: 16px;
     }
 
-    /* Стили для кнопки */
     button {
       margin-top: 20px;
       width: 100%;
@@ -62,9 +59,15 @@
       background-color: #45a049;
     }
 
-    /* Стили для результата — изначально скрыт */
-    #result {
+    /* Стили для результатов */
+    .result-container {
       margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-item {
       padding: 10px;
       border-radius: 4px;
       font-size: 1.2em;
@@ -73,26 +76,24 @@
       display: none; /* Скрыто по умолчанию */
     }
 
-    /* Стиль для "Расчёт..." */
-    #result.loading {
-      display: block; /* Показываем */
-      background-color: #e0e0e0; /* Светло-серый фон */
-      color: #666; /* Тёмно-серый текст */
+    .result-item.loading {
+      display: block;
+      background-color: #e0e0e0;
+      color: #666;
     }
 
-    /* Стиль для успешного результата */
-    #result.success {
-      background-color: #A5D6A7; /* Салатовый фон */
-      color: #000000; /* Тёмно-зелёный текст для контраста */
+    .result-item.success {
+      display: block;
+      background-color: #A5D6A7; /* Салатовый */
+      color: #2E7D32; /* Тёмно-зелёный */
     }
 
-    /* Стиль для ошибки */
-    #result.error {
-      background-color: #EF9A9A; /* Светло-красный фон */
-      color: #C62828; /* Тёмно-красный текст */
+    .result-item.error {
+      display: block;
+      background-color: #EF9A9A; /* Светло-красный */
+      color: #C62828; /* Тёмно-красный */
     }
 
-    /* Адаптивность для экранов шириной до 480px (мобильные) */
     @media (max-width: 480px) {
       body {
         padding: 10px;
@@ -126,7 +127,7 @@
     <label for="waitingHours">Количество часов ожидания:</label>
     <input type="number" id="waitingHours" placeholder="например, 0">
 
-    <label for="tollRoad">Платная дорога, стоимость:</label>
+    <label for="tollRoad">Платная дорога:</label>
     <input type="number" id="tollRoad" placeholder="например, 0">
 
     <label for="paidNights">Количество платных ночей в рейсе:</label>
@@ -137,7 +138,11 @@
 
     <button onclick="calculate()">Рассчитать</button>
 
-    <div id="result"></div>
+    <!-- Два блока для результатов -->
+    <div class="result-container">
+      <div id="resultStaria" class="result-item">Расчёт...</div>
+      <div id="resultRenault" class="result-item">Расчёт...</div>
+    </div>
   </div>
 
   <script>
@@ -145,28 +150,25 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzmliAW6ZEo3-0E9ZYjQ7nswnA_H5I6MuzUlj1MyaPt1wfnqfOwLeZ8QJFCZkTuaV0Mhg/exec';
 
     function calculate() {
-      const resultDiv = document.getElementById('result');
+      const resultStariaDiv = document.getElementById('resultStaria');
+      const resultRenaultDiv = document.getElementById('resultRenault');
 
-      // Сбрасываем все классы и устанавливаем loading
-      resultDiv.className = ''; // Убираем все предыдущие классы
-      resultDiv.classList.add('loading'); // Добавляем класс loading
-
-      // Показываем блок и устанавливаем текст
-      resultDiv.innerText = 'Расчёт...';
-      resultDiv.style.display = 'block';
+      // Показываем "Расчёт..." для обоих
+      resultStariaDiv.className = 'result-item loading';
+      resultRenaultDiv.className = 'result-item loading';
 
       const oneWayKm = document.getElementById('oneWayKm').value || 0;
       const waitingHours = document.getElementById('waitingHours').value || 0;
-      const tollRoad = parseFloat(document.getElementById('tollRoad').value) || 0;
-      const paidNights = parseFloat(document.getElementById('paidNights').value) || 0;
-      const idleDays = parseFloat(document.getElementById('idleDays').value) || 0;
+      const tollRoad = document.getElementById('tollRoad').value || 0;
+      const paidNights = document.getElementById('paidNights').value || 0;
+      const idleDays = document.getElementById('idleDays').value || 0;
 
       const formData = new FormData();
-      formData.append('oneWayKm', oneWayKm);
-      formData.append('waitingHours', waitingHours);
-      formData.append('tollRoad', tollRoad);
-      formData.append('paidNights', paidNights);
-      formData.append('idleDays', idleDays);
+      formData.append('oneWayKm', parseFloat(oneWayKm));
+      formData.append('waitingHours', parseFloat(waitingHours));
+      formData.append('tollRoad', parseFloat(tollRoad));
+      formData.append('paidNights', parseFloat(paidNights));
+      formData.append('idleDays', parseFloat(idleDays));
 
       fetch(WEB_APP_URL, {
         method: 'POST',
@@ -175,21 +177,26 @@
       .then(response => response.json())
       .then(data => {
         if (data.error) {
-          resultDiv.className = 'error';
-          resultDiv.innerText = `Ошибка: ${data.error}`;
+          resultStariaDiv.className = 'result-item error';
+          resultStariaDiv.innerText = `Ошибка: ${data.error}`;
+          resultRenaultDiv.className = 'result-item error';
+          resultRenaultDiv.innerText = `Ошибка: ${data.error}`;
         } else {
-          resultDiv.className = 'success';
-          resultDiv.innerText = `Итого: ${data.result} руб.`;
+          resultStariaDiv.className = 'result-item success';
+          resultStariaDiv.innerText = `Стоимость Staria: ${data.resultStaria} руб.`;
+
+          resultRenaultDiv.className = 'result-item success';
+          resultRenaultDiv.innerText = `Стоимость Renault: ${data.resultRenault} руб.`;
         }
       })
       .catch(error => {
         console.error('Ошибка:', error);
-        resultDiv.className = 'error';
-        resultDiv.innerText = 'Произошла ошибка при расчёте.';
+        resultStariaDiv.className = 'result-item error';
+        resultStariaDiv.innerText = 'Произошла ошибка при расчёте.';
+        resultRenaultDiv.className = 'result-item error';
+        resultRenaultDiv.innerText = 'Произошла ошибка при расчёте.';
       });
     }
   </script>
 </body>
 </html>
-
-
